@@ -28,6 +28,7 @@ export default function HomeLayout() {
     return (
         <OverlayProvider>
         <Chat client={client}>
+        
         <Stack><Stack.Screen name="(tabs)" options={{ headerShown: false }} /></Stack>
         </Chat>
       </OverlayProvider> 

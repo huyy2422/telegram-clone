@@ -1,6 +1,7 @@
 import { Slot, Stack } from "expo-router";
 import { useEffect } from "react";
 import { StreamChat } from "stream-chat";
+import { Chat, OverlayProvider} from 'stream-chat-expo';
 
 const client = StreamChat.getInstance("xg3agzbrbxgq");
 
@@ -15,14 +16,20 @@ export default function HomeLayout() {
                 },
                 client.devToken("ghuy"),
               );
-              const channel = client.channel("messaging", "the_halongans", {
-                name: "The Halongans",
-              });
-              await channel.watch();
+            //   const channel = client.channel("messaging", "the_halongans", {
+            //     name: "The Halongans",
+            //   });
+            //   await channel.watch();
         };
 
         connect();
     })
 
-    return <Slot/>;
+    return (
+        <OverlayProvider>
+        <Chat client={client}>
+        <Slot/>
+        </Chat>
+      </OverlayProvider> 
+    );
 }

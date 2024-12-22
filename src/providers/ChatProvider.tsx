@@ -1,11 +1,14 @@
-import { PropsWithChildren } from "react";
+import { PropsWithChildren, useState } from "react";
 import { useEffect } from "react";
+import { ActivityIndicator } from "react-native";
 import { StreamChat } from "stream-chat";
 import { Chat, OverlayProvider } from "stream-chat-expo";
 
-const client = StreamChat.getInstance("xg3agzbrbxgq");
+const client = StreamChat.getInstance(process.env.EXPO_PUBLIC_STREAM_API_KEY);
 
 export default function ChatProvider({ children }: PropsWithChildren) {
+    const [isReady, setIsready] = useState(false);
+
   useEffect(() => {
     const connect = async () => {
       await client.connectUser(
@@ -16,6 +19,8 @@ export default function ChatProvider({ children }: PropsWithChildren) {
         },
         client.devToken("ghuy")
       );
+      setIsready(true);
+
       //   const channel = client.channel("messaging", "the_halongans", {
       //     name: "The Halongans",
       //   });
@@ -23,7 +28,16 @@ export default function ChatProvider({ children }: PropsWithChildren) {
     };
 
     connect();
-  });
+
+    return () => {
+        client.disconnectUser();
+        setIsready(false);
+    }
+  }, []);
+
+  if (!isReady) {
+    return <ActivityIndicator/>;
+  }
 
   return (
     <OverlayProvider>

@@ -3,17 +3,19 @@ import { useEffect } from "react";
 import { ActivityIndicator } from "react-native";
 import { StreamChat } from "stream-chat";
 import { Chat, OverlayProvider } from "stream-chat-expo";
+import { useAuth } from "./AuthProvider";
 
 const client = StreamChat.getInstance(process.env.EXPO_PUBLIC_STREAM_API_KEY);
 
 export default function ChatProvider({ children }: PropsWithChildren) {
     const [isReady, setIsready] = useState(false);
+    const {user} = useAuth();
 
   useEffect(() => {
     const connect = async () => {
       await client.connectUser(
         {
-          id: "ghuy",
+          id: user.id,
           name: "Gia Huy",
           image: "https://i.imgur.com/fR9Jz14.png",
         },

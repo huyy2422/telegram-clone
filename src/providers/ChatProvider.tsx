@@ -8,18 +8,24 @@ import { useAuth } from "./AuthProvider";
 const client = StreamChat.getInstance(process.env.EXPO_PUBLIC_STREAM_API_KEY);
 
 export default function ChatProvider({ children }: PropsWithChildren) {
+  
     const [isReady, setIsready] = useState(false);
-    const {user} = useAuth();
+    const {profile} = useAuth();
 
   useEffect(() => {
+    console.log("USE_EFFECT: ", profile);
+    if (!profile) {
+      return;
+    }
     const connect = async () => {
+      console.log(profile.full_name);
       await client.connectUser(
         {
-          id: user.id,
-          name: "Gia Huy",
+          id: profile.id,
+          name: profile.full_name,
           image: "https://i.imgur.com/fR9Jz14.png",
         },
-        client.devToken("ghuy")
+        client.devToken(profile.id)
       );
       setIsready(true);
 
@@ -32,10 +38,12 @@ export default function ChatProvider({ children }: PropsWithChildren) {
     connect();
 
     return () => {
+      if (isReady) {
         client.disconnectUser();
+      }
         setIsready(false);
     }
-  }, []);
+  }, [profile?.id]);
 
   if (!isReady) {
     return <ActivityIndicator/>;

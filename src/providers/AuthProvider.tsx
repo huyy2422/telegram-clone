@@ -1,15 +1,23 @@
 import { Session, User } from "@supabase/supabase-js";
-import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
+import {
+  createContext,
+  PropsWithChildren,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { supabase } from "../lib/supabase";
 
 type AuthContext = {
   session: Session | null;
   user: User | null;
+  profile: any;
 };
 
 const AuthContext = createContext<AuthContext>({
   session: null,
   user: null,
+  profile: null,
 });
 
 export default function AuthProvider({ children }: PropsWithChildren) {
@@ -28,17 +36,23 @@ export default function AuthProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (!session?.user) {
+      setProfile(null);
       return;
     }
 
     const fetchProfile = async () => {
-    }
+      let { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq('id', session.user.id)
+        .single();
+      setProfile(data);
+    };
     fetchProfile();
-
-  }, [session?.user])
+  }, [session?.user]);
 
   return (
-    <AuthContext.Provider value={{ session, user: session?.user }}>
+    <AuthContext.Provider value={{ session, user: session?.user, profile }}>
       {children}
     </AuthContext.Provider>
   );

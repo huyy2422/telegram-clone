@@ -4,13 +4,13 @@ import { ActivityIndicator } from "react-native";
 import { StreamChat } from "stream-chat";
 import { Chat, OverlayProvider } from "stream-chat-expo";
 import { useAuth } from "./AuthProvider";
+import { supabase } from "../lib/supabase";
 
 const client = StreamChat.getInstance(process.env.EXPO_PUBLIC_STREAM_API_KEY);
 
 export default function ChatProvider({ children }: PropsWithChildren) {
-  
-    const [isReady, setIsready] = useState(false);
-    const {profile} = useAuth();
+  const [isReady, setIsReady] = useState(false);
+  const { profile } = useAuth();
 
   useEffect(() => {
     console.log("USE_EFFECT: ", profile);
@@ -23,11 +23,13 @@ export default function ChatProvider({ children }: PropsWithChildren) {
         {
           id: profile.id,
           name: profile.full_name,
-          image: "https://i.imgur.com/fR9Jz14.png",
+          image: supabase.storage
+            .from("avatars")
+            .getPublicUrl(profile.avatar_url).data.publicUrl,
         },
         client.devToken(profile.id)
       );
-      setIsready(true);
+      setIsReady(true);
 
       //   const channel = client.channel("messaging", "the_halongans", {
       //     name: "The Halongans",
@@ -41,12 +43,12 @@ export default function ChatProvider({ children }: PropsWithChildren) {
       if (isReady) {
         client.disconnectUser();
       }
-        setIsready(false);
-    }
+      setIsReady(false);
+    };
   }, [profile?.id]);
 
   if (!isReady) {
-    return <ActivityIndicator/>;
+    return <ActivityIndicator />;
   }
 
   return (

@@ -1,58 +1,50 @@
-import { Session, User } from "@supabase/supabase-js";
-import {
-  createContext,
-  PropsWithChildren,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
-import { supabase } from "../lib/supabase";
+import { createContext, PropsWithChildren, useContext, useEffect, useState } from "react";
+import { auth, db } from "../lib/firebase";
+import { onAuthStateChanged, User } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 
 type AuthContext = {
-  session: Session | null;
   user: User | null;
   profile: any;
 };
 
 const AuthContext = createContext<AuthContext>({
-  session: null,
   user: null,
   profile: null,
 });
 
 export default function AuthProvider({ children }: PropsWithChildren) {
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState();
+  const [user, setUser] = useState<User | null>(null);
+  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
     });
 
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+    return () => unsubscribe();
   }, []);
 
   useEffect(() => {
-    if (!session?.user) {
+    if (!user) {
       setProfile(null);
       return;
     }
 
     const fetchProfile = async () => {
-      let { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq('id', session.user.id)
-        .single();
-      setProfile(data);
+      const docRef = doc(db, "profiles", user.uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setProfile(docSnap.data());
+      } else {
+        console.log("No such document!");
+      }
     };
     fetchProfile();
-  }, [session?.user]);
+  }, [user]);
 
   return (
-    <AuthContext.Provider value={{ session, user: session?.user, profile }}>
+    <AuthContext.Provider value={{ user, profile }}>
       {children}
     </AuthContext.Provider>
   );

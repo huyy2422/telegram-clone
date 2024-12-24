@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { Text, FlatList } from "react-native";
-import { supabase } from "../../lib/supabase";
+import { Text, FlatList, Alert } from "react-native";
+import { db } from "../../lib/firebase";
 import { useAuth } from "../../providers/AuthProvider";
 import UserListItem from "../../providers/UserListItem";
+import { collection, query, where, getDocs } from "firebase/firestore";
 
 export default function UserScreen() {
   const [users, setUsers] = useState([]);
@@ -10,20 +11,27 @@ export default function UserScreen() {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      let { data: profiles, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .neq("id", user.id);
+      try {
+        if (!user) throw new Error("No user on the session!");
+
+        const q = query(collection(db, "profiles"), where("id", "!=", user.uid));
+        const querySnapshot = await getDocs(q);
+        const profiles = querySnapshot.docs.map((doc) => doc.data());
         setUsers(profiles);
+      } catch (error) {
+        if (error instanceof Error) {
+          Alert.alert(error.message);
+        }
+      }
     };
     fetchUsers();
-  });
+  }, [user]);
 
   return (
     <FlatList
       data={users}
-      contentContainerStyle={{gap: 5}}
-      renderItem={({ item }) => <UserListItem user={item}/>}
+      contentContainerStyle={{ gap: 5 }}
+      renderItem={({ item }) => <UserListItem user={item} />}
     />
   );
 }

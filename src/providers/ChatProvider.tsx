@@ -1,10 +1,10 @@
-import { PropsWithChildren, useState } from "react";
-import { useEffect } from "react";
+import { PropsWithChildren, useState, useEffect } from "react";
 import { ActivityIndicator } from "react-native";
 import { StreamChat } from "stream-chat";
 import { Chat, OverlayProvider } from "stream-chat-expo";
 import { useAuth } from "./AuthProvider";
-import { supabase } from "../lib/supabase";
+import { db } from "../lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 const client = StreamChat.getInstance(process.env.EXPO_PUBLIC_STREAM_API_KEY);
 
@@ -23,29 +23,18 @@ export default function ChatProvider({ children }: PropsWithChildren) {
         {
           id: profile.id,
           name: profile.full_name,
-          image: supabase.storage
-            .from("avatars")
-            .getPublicUrl(profile.avatar_url).data.publicUrl,
+          image: profile.avatar_url,
         },
         client.devToken(profile.id)
       );
       setIsReady(true);
-
-      //   const channel = client.channel("messaging", "the_halongans", {
-      //     name: "The Halongans",
-      //   });
-      //   await channel.watch();
     };
-
     connect();
 
     return () => {
-      if (isReady) {
-        client.disconnectUser();
-      }
-      setIsReady(false);
+      client.disconnectUser();
     };
-  }, [profile?.id]);
+  }, [profile]);
 
   if (!isReady) {
     return <ActivityIndicator />;

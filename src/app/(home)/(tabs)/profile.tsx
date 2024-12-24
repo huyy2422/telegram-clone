@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
-import { supabase } from "../../../lib/supabase";
+import { auth, db } from "../../../lib/firebase";
 import { StyleSheet, View, Alert } from "react-native";
 import { Button, Input } from "@rneui/themed";
-import { Session } from "@supabase/supabase-js";
 import { useAuth } from "../../../providers/AuthProvider";
 import Avatar from "../../../components/avt";
 import { ScrollView } from "react-native-gesture-handler";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 export default function ProfileScreen() {
-  const { session } = useAuth();
+  const { user } = useAuth();
 
   const [loading, setLoading] = useState(true);
   const [username, setUsername] = useState("");
@@ -17,28 +17,24 @@ export default function ProfileScreen() {
   const [avatarUrl, setAvatarUrl] = useState("");
 
   useEffect(() => {
-    if (session) getProfile();
-  }, [session]);
+    if (user) getProfile();
+  }, [user]);
 
   async function getProfile() {
     try {
       setLoading(true);
-      if (!session?.user) throw new Error("No user on the session!");
+      if (!user) throw new Error("No user on the session!");
 
-      const { data, error, status } = await supabase
-        .from("profiles")
-        .select(`username, website, avatar_url, full_name`)
-        .eq("id", session?.user.id)
-        .single();
-      if (error && status !== 406) {
-        throw error;
-      }
-
-      if (data) {
+      const docRef = doc(db, "profiles", user.uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
         setUsername(data.username);
         setWebsite(data.website);
         setAvatarUrl(data.avatar_url);
         setFullname(data.full_name);
+      } else {
+        console.log("No such document!");
       }
     } catch (error) {
       if (error instanceof Error) {
@@ -62,10 +58,9 @@ export default function ProfileScreen() {
   }) {
     try {
       setLoading(true);
-      if (!session?.user) throw new Error("No user on the session!");
+      if (!user) throw new Error("No user on the session!");
 
       const updates = {
-        id: session?.user.id,
         username,
         website,
         avatar_url,
@@ -73,11 +68,7 @@ export default function ProfileScreen() {
         updated_at: new Date(),
       };
 
-      const { error } = await supabase.from("profiles").upsert(updates);
-
-      if (error) {
-        throw error;
-      }
+      await setDoc(doc(db, "profiles", user.uid), updates);
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert(error.message);
@@ -105,7 +96,7 @@ export default function ProfileScreen() {
         />
       </View>
       <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Input label="Email" value={session?.user?.email} disabled />
+        <Input label="Email" value={user?.email} disabled />
       </View>
       <View style={styles.verticallySpaced}>
         <Input
@@ -145,7 +136,7 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.verticallySpaced}>
-        <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
+        <Button title="Sign Out" onPress={() => auth.signOut()} />
       </View>
     </ScrollView>
   );

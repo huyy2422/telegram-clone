@@ -2,11 +2,18 @@
   "expo": {
     "name": "clone",
     "slug": "clone",
-    "scheme": "tlgclone",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
+    "extra": {
+      "firebaseApiKey": "AIzaSyBYbh7iUOB9i_q3a84wiFm71z2XZ-HF-RU",
+      "firebaseAuthDomain": "tlg-clone.firebaseapp.com",
+      "firebaseProjectId": "tlg-clone",
+      "firebaseStorageBucket": "tlg-clone.firebasestorage.app",
+      "firebaseMessagingSenderId": "1006416048731",
+      "firebaseAppId": ":1006416048731:web:07db84808ce84d261c057e"
+    },
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",

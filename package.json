@@ -19,7 +19,13 @@
     "expo-linking": "~6.2.2",
     "expo-constants": "~15.4.6",
     "typescript": "^5.3.0",
-    "@types/react": "~18.2.45"
+    "@types/react": "~18.2.45",
+    "@react-native-async-storage/async-storage": "1.21.0",
+    "@react-native-community/netinfo": "11.1.0",
+    "@rneui/themed": "^4.0.0-rc.8",
+    "@stream-io/flat-list-mvcp": "^0.10.3",
+    "0g": "^0.4.2",
+    "react-native-reanimated": "~3.6.2"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0"

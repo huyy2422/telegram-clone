@@ -12,7 +12,11 @@ const [isReady, setIsReady] = useState(false);
 const { profile } = useAuth();
 
   useEffect(() => {
+    if (!profile) {
+      return;
+    }
     const connect = async () => {
+      
       await client.connectUser(
         {
           id: profile.id,
@@ -33,10 +37,12 @@ const { profile } = useAuth();
     connect();
 
     return () => {
+      if(isReady ) {
         client.disconnectUser();
+      }
         setIsReady(false);
     }
-  }, [profile]);
+  }, [profile?.id]);
 
   if(!isReady) {
     return <ActivityIndicator/>;

@@ -31,6 +31,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     if (!session?.user) {
+      setProfile(null);
       return;
     }
 

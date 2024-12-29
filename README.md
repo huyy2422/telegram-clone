@@ -23,8 +23,9 @@
   <h4 align="center">Updating Image and Name</h4>
   <p align="center">After update your avatar, your username and your full name. 
     The data gonna be sent to the Supabase Database.</p>
+<p align="left">React Native documentaries: https://reactnative.dev/docs/getting-started</p>
+<p align="left">Stream Chat: https://getstream.io/</p>
+<p align="left">Supabase: https://supabase.com/</p>
 </div>
 
-React Native documentaries: https://reactnative.dev/docs/getting-started
-Stream Chat: https://getstream.io/
-Supabase: https://supabase.com/
+
